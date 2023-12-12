@@ -55,14 +55,15 @@ void soln2(std::istream& input){
             {"blue", 0}
         };
         // std::istringstream s{ line };
-        // std::cout << line << std::endl;
+        // std::cout << "start -----------" << std::endl;
         // std::cout << value << colour << std::endl;
-        s >> value; s >> colour;
+        // s >> value; s >> colour;
         while( s >> value && s >> colour ){
             char last = colour[colour.length() -1];
             if( last == ';' || last == ',' ) colour = colour.substr(0, colour.length() - 1);
             // if( value > MAX_CUBES.at(colour) ){ add = false; break; }
-            // std::cout << colour << ": " << value << std::endl;
+            // std::cout << colour << ": " << value  << "-- " << GAME_MAX[colour] << std::endl;
+
             GAME_MAX[colour] = std::max( GAME_MAX[colour], value );
         }
         // std::cout << std::reduce(GAME_MAX.begin(), GAME_MAX.end()) << std::endl;
@@ -71,10 +72,10 @@ void soln2(std::istream& input){
         //                     std::cout << prev << " " << value.second << std::endl;
         //                     return prev+value.second;
         //                 });
-        std::cout << "==============================" << std::endl;
-        for(auto& [key, pair]: GAME_MAX){
-            std::cout << key << " " << pair << std::endl;
-        }
+        // std::cout << "==============================" << std::endl;
+        // for(auto& [key, pair]: GAME_MAX){
+            // std::cout << key << " " << pair << std::endl;
+        // }
         total += std::accumulate(std::begin(GAME_MAX), std::end(GAME_MAX), 1,
         [](const auto& prev, const auto& value){
             // std::cout << prev << " " << value.second;
