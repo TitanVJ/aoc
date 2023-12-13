@@ -1,9 +1,6 @@
 #include <iostream>
 #include <bits/stdc++.h>
 
-enum Content { NUMBER, SYMBOL, DOT };
-using content_t = enum Content;
-
 struct Cell {
     private:
         int num;
