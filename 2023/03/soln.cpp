@@ -4,24 +4,6 @@
 enum Content { NUMBER, SYMBOL, DOT };
 using content_t = enum Content;
 
-// struct Cell {
-//     private:
-//         int num;
-//         bool _visited;
-//         content_t _content;
-//     public:
-//         Cell(content_t c): num{-1}, _visited{false}, _content{c} {}
-//         Cell(content_t c, int n): num{n}, _visited{false}, _content{c} {}
-
-//         content_t content() { return _content; }
-//         int value() {
-//             if( _visited ){
-//                 _visited = true;
-//                 return num;
-//             }
-//             return 0;
-//         }
-// };
 struct Cell {
     private:
         int num;
@@ -35,24 +17,28 @@ using Cell_t = struct Cell;
 using Row_t = std::vector<std::shared_ptr<Cell_t>>;
 using Grid_t = std::vector<Row_t>;
 
-// int window_sum(std::vector<std::shared_ptr<Cell_t>>& A, int R, int C, int idx) {}
-// int window_sum(Grid_t& grid, int r, int c) { }
+int window_sum(Grid_t& grid, int r, int c) {
+    int up = r-1; int down = r+1;
+    int left = c-1; int right = c+1;
+    std::pair<int, int> coors[8] = {{up, left}, {up, c}, {up, right},
+                                    {r, left}, {r, right},
+                                    {down, left}, {down, c}, {down, right}
+                                    };
+
+    return std::accumulate(std::begin(coors), std::end(coors), 0,
+                            [grid](const auto& lhs, const auto& rhs) {
+                                return lhs + grid[rhs.first][rhs.second]->value();
+                            });
+}
 
 // NOTE: separate pass 1 to create grid fix the colour
-// void gen_grid(Grid_t& grid, std::istream& input){}
-
 void soln(std::istream& input){
-
     std::string line;
     Grid_t grid;
 
     while( input >> line ){
         size_t nCols = line.length();
         Row_t row; row.reserve( nCols + 2 );
-
-        // row.push_back( std::make_shared<Cell_t>(0) );
-
-        std::cout << line << " [";
         for( size_t i = 0; i < nCols; ++i ){
             if( isdigit(line[i]) ){
                 // want to absorb the remaining digits to create one
@@ -63,15 +49,6 @@ void soln(std::istream& input){
 
                 int length = std::distance(it, end_it);
                 int num = std::stoi(line.substr(i, length));
-                std::cout << num << ", ";
-                // std::cout   << line << "\nC: " << line[i] << ": len=" << length << " num=" << num
-                //             << " i=" << i << " ++i=" << i+length << std::endl;
-                // TODO: 2d -> 1d coordinates
-                // row = floor( x / rows )
-                // col = x % cols -1
-                // auto ptr = std::make_shared<Cell_t>(num);
-                // for( auto i = 0; i < length; ++i)
-                //     row.push_back(ptr);
                 std::fill_n( std::back_inserter(row), length, std::make_shared<Cell_t>(num) );
 
                 // Update i past num, -1 => loop inc
@@ -81,23 +58,24 @@ void soln(std::istream& input){
                 row.push_back( std::make_shared<Cell_t>(line[i] != '.') );
             }
         }
+        // 0 padding
         row.insert(std::begin(row), std::make_shared<Cell_t>(0) );
         row.push_back( std::make_shared<Cell_t>(0) );
-
-        std::cout << "]" << std::endl << row.size() << std::endl;
-        for( auto& cell : row ){
-            std::cout << cell->value() << " ";
-            // std::cout << "Symbol? " << ( (cell->Symbol)? "T" : "F" ) << " Num: " << cell->value() << std::endl;
-        }
-        std::cout << std::endl << "---------------------\n";
         grid.push_back( row );
     }
+    // 0 padding
     std::vector<std::shared_ptr<Cell_t>> vec(grid[0].size(), std::make_shared<Cell_t>(false));
     grid.insert(std::begin(grid), vec);
     grid.push_back(vec);
 
-    // print the 2d array
-    // grid.push_back( &std::vector<Cell_t>(grid[0].size(), std::make_shared<Cell_t>(false)) );
+    int total = 0;
+    for( int r = 1; r < grid.size() - 1; ++r ){
+        for( int c = 1; c < grid[0].size()-1; ++c ){
+            if(grid[r][c]->Symbol)
+                total += window_sum(grid, r, c);
+        }
+    }
+    std::cout << "Total: " << total << std::endl;
 }
 
 void soln2(std::istream& input){
