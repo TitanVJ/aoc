@@ -1,0 +1,7 @@
+#!/bin/bash
+
+mkdir $1
+cp soln.cpp.template $1/soln.cpp
+cp Makefile.template $1/Makefile
+cp -r .vscode $1/
+
