@@ -86,7 +86,7 @@ void soln(std::istream& input){
         // for(auto& entry: map ){
         //     std::cout << entry << std::endl;
         // }
-        std::cout << map;
+        std::cout << map << std::endl;
     }
 }
 
