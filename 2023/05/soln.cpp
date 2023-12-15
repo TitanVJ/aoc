@@ -4,45 +4,44 @@
 struct Map_entry { //NOTE: re-enable this => map -> map entry and have a map consist of these?
              //      move the strings to the parent element instead for the map values?
     private:
-        int src;
-        int dst;
-        int range;
-        // std::unordered_map<int, std::pair<int, int>> map;
-        // std::string source;
-        // std::string destination;
+        size_t src;
+        size_t dst;
+        size_t range;
     public:
-        // Map(std::string _s, std::string _d): source{_s}, destination{_d};
-        Map_entry(int _src, int _dst, int _range) :src{_src}, dst{_dst}, range{_range} {}
-        // int operator[](const int idx){
-        //     if( idx >= src && idx <= src+range ){
-        //        return dst + (src + range - idx);
-        //     }
-        //     return idx;
-        // }
+        Map_entry(size_t _src, size_t _dst, size_t _range) :src{_src}, dst{_dst}, range{_range} {}
+        size_t get(size_t key) {
+            if( key >= src && key <= src+range) return dst + abs(src - key);
+            return key;
+        }
         friend std::ostream& operator<<(std::ostream&, const Map_entry&);
 };
 using Entry_t = struct Map_entry;
 
 std::ostream& operator<<(std::ostream& os, const Entry_t& data) {
-    os  << std::setw(5) << data.src
+    os  << std::setw(10) << data.src
         << " -> "
-        << std::setw(5) << data.dst
-        << std::setw(5) << "(" << data.range << ")";
+        << std::setw(10) << data.dst
+        << std::setw(12) << "(" << data.range << ")";
     return os;
 }
+
 struct Map {
     private:
         std::vector<Entry_t> entries;
     public:
         Map(): entries{} {}
-        void add(int s, int d, int r) { entries.emplace_back(s, d, r); }
-        int operator[](const int key){
+        void add(size_t s, size_t d, size_t r) { entries.emplace_back(s, d, r); }
+        size_t operator[](const size_t key){
             // TODO: all entries for possible mapping
-            return 0;
+            auto it = std::begin(entries);
+            size_t ret = key;
+            do {
+                ret = it++->get(key);
+            } while( it != std::end(entries) && ret == key);
+            return ret;
         }
         friend std::ostream& operator<<(std::ostream&, const Map&);
 };
-// using Map_t = std::vector<Entry_t>;
 using Map_t = struct Map;
 std::ostream& operator<<(std::ostream& os, const Map& data) {
     for(auto& e : data.entries )
@@ -50,19 +49,22 @@ std::ostream& operator<<(std::ostream& os, const Map& data) {
     return os;
 }
 
+// NOTE: for part 2 need a ranged seed type like above.
+//       only matters for seed -> soil, after that its normal?
+
 void soln(std::istream& input){
     std::string line;
-    std::vector<int> seeds;
+    std::vector<size_t> seeds;
 
     getline(input, line);
     std::stringstream sds{line};
     std::string seed;
     sds >> seed;
     while( sds >> seed )
-        seeds.push_back( std::stoi(seed) );
+        seeds.push_back( std::stoll(seed) );
 
     std::vector<Map_t> maps(7);
-    int map_idx = -1;
+    size_t map_idx = -1;
     while( getline(input, line) ){
         if(line.empty()) continue;
 
@@ -72,22 +74,33 @@ void soln(std::istream& input){
             ++map_idx;
             continue;
         }
-        // std::cout << "[" << line << "]" << std::endl;
 
         std::stringstream s{line};
-        int dst, src, range;
+        size_t dst, src, range;
         s >> dst >> src >> range;
         maps[map_idx].add(src, dst, range);
     }
 
-    int i = 0;
-    for(auto& map : maps ){
-        std::cout << "map: " << i++ << std::endl;
-        // for(auto& entry: map ){
-        //     std::cout << entry << std::endl;
-        // }
-        std::cout << map << std::endl;
+    // size_t i = 0;
+    // for(auto& map : maps ){
+    //     std::cout << "Map: " << i++ << std::endl;
+    //     std::cout << map << std::endl;
+    // }
+
+    // need location per seed
+    std::vector<size_t> locs;
+    for( auto seed : seeds ) {
+        // std::cout << "Seed: " << seed << " ";
+        size_t key = seed;
+        for( auto& map : maps ){
+            key = map[key];
+        }
+        // std::cout << "Loc: " << key << std::endl;
+        locs.push_back(key);
     }
+    size_t min = *std::min_element(std::begin(locs), std::end(locs));
+    std::cout << "Min Location: " << min << std::endl;
+
 }
 
 void soln2(std::istream& input){
