@@ -2,3 +2,4 @@ soln
 sm*.txt
 **/.vscode/settings.json
 *.txt
+.vscode
